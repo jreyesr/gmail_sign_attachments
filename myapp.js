@@ -5,7 +5,7 @@ InboxSDK.load(2, CREDENTIALS.INBOXSDK_APP_ID).then(function(sdk){
 
     // a compose view has come into existence, do something with it!
     composeView.addButton({
-      title: "My Nifty Button!",
+      title: "Sign & Send",
       type: "SEND_ACTION",
       iconUrl: "https://material-icons.github.io/material-icons-png/png/white/edit/baseline-4x.png",
       iconClass: "sendAndSign",
@@ -21,14 +21,55 @@ function getAttachments(mailBody) {
   return Array.from(attachmentLinks).map(a => a.getAttribute("href"));
 }
 
-/** @brief Compute a 
+/** @brief Compute a signature from the contents of a URL
     
-    @param 
+    @param url A string containing a URL pointing to the file that will be signed
 **/
-function computeSignature(url) {
-  fetch(url)
-    .then(response => response.arrayBuffer())
-    .then(data => console.log(data));
+async function computeSignature(url) {
+  // The following two functions are on https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey#pkcs_8_import
+  function str2ab(str) {
+    const buf = new ArrayBuffer(str.length);
+    const bufView = new Uint8Array(buf);
+    for (let i = 0, strLen = str.length; i < strLen; i++) {
+      bufView[i] = str.charCodeAt(i);
+    }
+    return buf;
+  }
+  function importPrivateKey(pem) {
+    // fetch the part of the PEM string between header and footer
+    const pemHeader = "-----BEGIN PRIVATE KEY-----";
+    const pemFooter = "-----END PRIVATE KEY-----";
+    const pemContents = pem.substring(pemHeader.length, pem.length - pemFooter.length).trim();
+    // base64 decode the string to get the binary data
+    const binaryDerString = window.atob(pemContents);
+    // convert from a binary string to an ArrayBuffer
+    const binaryDer = str2ab(binaryDerString);
+
+    return window.crypto.subtle.importKey(
+      "pkcs8",
+      binaryDer,
+      {
+        name: "ECDSA",
+        namedCurve: "P-521"
+      },
+      true,
+      ["sign"]
+    );
+  }
+  
+  async function sign(data, key) {
+    return await window.crypto.subtle.sign(
+      { name: "ECDSA", hash: {name: "SHA-512"} },
+      key,
+      data
+    );
+  }
+  
+  let key = await importPrivateKey(CREDENTIALS.PRIVATE_SIGNING_KEY);
+  let fileContents = (await fetch(url)).arrayBuffer();
+  let signature = await sign(await fileContents, key);
+    
+  return signature;
 }
 
 function signAndSend(composeView) {  
@@ -37,7 +78,7 @@ function signAndSend(composeView) {
   // https://stackoverflow.com/questions/47786892/get-all-attachments-of-gmail-compose-box-using-inboxsdk
   var mailBody = composeView.getBodyElement().closest('div.inboxsdk__compose');
   for(let attachmentUrl of getAttachments(mailBody)) {
-    computeSignature(attachmentUrl);
+    computeSignature(attachmentUrl).then(sig => console.log(btoa(sig)));
   }
   
   // 2. Sign every attachment, create files: Array<Blob>
