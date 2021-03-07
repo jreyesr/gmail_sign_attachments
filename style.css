@@ -1,0 +1,10 @@
+.sendAndSign:after{
+  content: "Sign & Send"; 
+  font-family: 'Google Sans', Roboto,RobotoDraft,Helvetica,Arial,sans-serif;
+  font-size: .875rem;
+  letter-spacing: .25px;
+  font-weight: 500;
+  padding: 0 8px;
+  line-height: 18px;
+  vertical-align: middle;
+}​
