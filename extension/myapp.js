@@ -88,7 +88,7 @@ function signAndSend(composeView) {
   Promise.all(signaturePromises).then(signatures => {   
     // First map turns the signature into a Base64 string
     // Second map turns the Base64 string into a Blob with a header and a footer
-    let blobs = signatures.map(sig => [sig[0], btoa(sig[1])]).map(sig => [sig[0], new Blob(["This is a header\n", sig[0], "\n\n", sig[1], "\nThis is a footer"])]);
+    let blobs = signatures.map(sig => [sig[0], btoa(sig[1])]).map(sig => [sig[0], new Blob(["This is the signature file for file ", sig[0], "\n\n", sig[1], "\n\n You can verify the signature on ", CREDENTIALS.VERIFICATION_URL])]);
     // Per https://inboxsdk.github.io/inboxsdk-docs/compose#attachfilesfiles, Blob objects MUST have their name property set
     blobs.forEach(b => b[1].name = b[0] + ".signature"); // Set attachment name to original name plus ".signature" suffix
     blobs = blobs.map(b => b[1]); // The filename is no longer required, just take it out 
@@ -99,7 +99,7 @@ function signAndSend(composeView) {
     // 3. Add footer on message explaining attachments & link to verification page
     if(signatures.length > 0) {
       let footer = document.createElement("div");
-      footer.innerHTML = '<hr>This email\'s attachments are digitally signed to guarantee that they come from A B. To verify the signatures, visit <a href="https://example.com">https://example.com</a>';
+      footer.innerHTML = `<hr>This email's attachments are digitally signed to guarantee that they come from A B. To verify the signatures, visit <a href="${CREDENTIALS.VERIFICATION_URL}">${CREDENTIALS.VERIFICATION_URL}</a>`;
       composeView.setBodyHTML(composeView.getHTMLContent() + footer.outerHTML);
     }
     
