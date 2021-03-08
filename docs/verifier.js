@@ -101,12 +101,12 @@ function handleFileChange() {
     return;
   }
 
-  // Check if files have same name and one has suffix .signature
+  // Check if files have same name and one has suffix .signature.txt
   // Get filenames, sort by length (ascending)
   const sortedFilenames = Array.from(files).map(f => f.name).sort((a, b) => a.length - b.length);
-  if(sortedFilenames[1] != sortedFilenames[0] + ".signature") {
+  if(sortedFilenames[1] != sortedFilenames[0] + ".signature.txt") {
     flashMessage(`The signature does not appear to correspond to the file!
-      Choose files ${sortedFilenames[0]} and ${sortedFilenames[0] + ".signature"}`, 2000);
+      Choose files ${sortedFilenames[0]} and ${sortedFilenames[0] + ".signature.txt"}`, 2000);
     verifyButton.disabled = true;
     return;
   }
