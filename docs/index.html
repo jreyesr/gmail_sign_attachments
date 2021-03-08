@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head><title>Gmail Save&Sign Verifier</title></head>
+
+<body>
+
+<label>
+  <input type="file" id="files" multiple>
+  File & Signature
+</label>
+
+<div id="status"></div>
+<div id="valid_message" style="display: none;">
+  This signature is valid!
+
+  What does this mean?
+
+  <ul>
+    <li>The file <span class="filename"></span> was created by A B</li>
+    <li>The file hasn't been modified by anyone <i>at all</i> after being sent by A B</li>
+  </ul>
+
+  Therefore, you can treat the file <span class="filename"></span> as the True Voice of A B
+</div>
+<div id="invalid_message" style="display: none;">
+  This signature is NOT valid!
+
+  What does this mean?
+
+  Either:
+  <ul>
+    <li>The file <span class="filename"></span>  was not created by A B,</li>
+    <li>The file or the signature were modified by someone after being sent by A B, or</li>
+    <li>The file or the signature were corrupted during download</li>
+  </ul>
+
+  In any case, you should NOT assume that the file <span class="filename"></span> comes from A B.
+  Nothing can be guaranteed about the origin of the file.
+</div>
+
+<button id="verify" disabled>Verify</button>
+
+<script src="credentials.js"></script>
+<script src="verifier.js"></script>
+</body>
+</html>
