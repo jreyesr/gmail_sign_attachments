@@ -18,14 +18,17 @@ InboxSDK.load(2, CREDENTIALS.INBOXSDK_APP_ID).then(function(sdk){
 
 function getAttachments(mailBody) {
   var attachmentLinks = mailBody.querySelectorAll('input[name="attach"] + a');
-  return Array.from(attachmentLinks).map(a => a.getAttribute("href"));
+  return Array
+    .from(attachmentLinks) // Convert NodeList to array
+    .map(a => [a.firstChild.textContent, a.getAttribute("href")]) // firstChild is text, second is size, href points to Google servers
+    .filter(a => !a[0].endsWith(".signature")); // Don't compute the signature of signatures!
 }
 
 /** @brief Compute a signature from the contents of a URL
     
     @param url A string containing a URL pointing to the file that will be signed
 **/
-async function computeSignature(url) {
+async function computeSignature(filename, url) {
   // The following two functions are on https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey#pkcs_8_import
   function str2ab(str) {
     const buf = new ArrayBuffer(str.length);
@@ -69,22 +72,38 @@ async function computeSignature(url) {
   let fileContents = (await fetch(url)).arrayBuffer();
   let signature = await sign(await fileContents, key);
     
-  return signature;
+  return [filename, signature];
 }
 
 function signAndSend(composeView) {  
-  let files = [];
+  let signaturePromises = [];
   // 1. Iterate over all attachments
   // https://stackoverflow.com/questions/47786892/get-all-attachments-of-gmail-compose-box-using-inboxsdk
   var mailBody = composeView.getBodyElement().closest('div.inboxsdk__compose');
-  for(let attachmentUrl of getAttachments(mailBody)) {
-    computeSignature(attachmentUrl).then(sig => console.log(btoa(sig)));
+  for(let [filename, attachmentUrl] of getAttachments(mailBody)) {
+    signaturePromises.push(computeSignature(filename, attachmentUrl));
   }
   
-  // 2. Sign every attachment, create files: Array<Blob>
-  // composeView.attachFiles(files);
+  // Wait for all signatures to resolve
+  Promise.all(signaturePromises).then(signatures => {   
+    // First map turns the signature into a Base64 string
+    // Second map turns the Base64 string into a Blob with a header and a footer
+    let blobs = signatures.map(sig => [sig[0], btoa(sig[1])]).map(sig => [sig[0], new Blob(["This is a header\n", sig[0], "\n\n", sig[1], "\nThis is a footer"])]);
+    // Per https://inboxsdk.github.io/inboxsdk-docs/compose#attachfilesfiles, Blob objects MUST have their name property set
+    blobs.forEach(b => b[1].name = b[0] + ".signature"); // Set attachment name to original name plus ".signature" suffix
+    blobs = blobs.map(b => b[1]); // The filename is no longer required, just take it out 
+    
+    // 2. Attach signatures as files to message
+    composeView.attachFiles(blobs);
   
-  // 3. Add footer on message explaining attachments & link to verification page
-  
-  composeView.send();
+    // 3. Add footer on message explaining attachments & link to verification page
+    if(signatures.length > 0) {
+      let footer = document.createElement("div");
+      footer.innerHTML = '<hr>This email\'s attachments are digitally signed to guarantee that they come from A B. To verify the signatures, visit <a href="https://example.com">https://example.com</a>';
+      composeView.setBodyHTML(composeView.getHTMLContent() + footer.outerHTML);
+    }
+    
+    // 4. Send message (finally!)
+    composeView.send();
+  });  
 }
