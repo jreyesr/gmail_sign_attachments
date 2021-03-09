@@ -4,7 +4,8 @@
   "version": "1.0",
   "permissions": [
     "https://mail.google.com/",
-    "https://inbox.google.com/"
+    "https://inbox.google.com/",
+    "storage"
   ],
   "content_scripts" : [
     {
@@ -12,5 +13,13 @@
       "js": ["inboxsdk.js", "credentials.js", "myapp.js"],
       "css": ["style.css"]
     }
-  ]
+  ],
+  "background": {
+    "scripts": ["postinstall.js"],
+    "persistent": false
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  }
 }

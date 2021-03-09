@@ -13,14 +13,16 @@ The extension is provided as an unpacked Chrome extension. I currently have no p
 To use the extension, therefore, the following steps are required:
 1. Clone or download the repository, or at least the `extension` folder.
 1. Configure the extension:
-    1. Copy the `extension/credentials.js.sample` file to `extension/credentials.js`. 
-    1. Edit `extension/credentials.js` and fill all fields with your own data. `INBOXSDK_APP_ID` should be generated on InboxSDK's page (the URL is on the `credentials.js` file). `PRIVATE_SIGNING_KEY` should be set to a valid ECDSA P-521 private key, encoded as PEM. `VERIFICATION_URL` should be the URL on which the companion verifier webpage is hosted (it will appear on email footers and on every signature file).
+    1. Copy the `extension/credentials.js.sample` file to `extension/credentials.js`.
+    1. Edit `extension/credentials.js` and fill all fields with your own data. `INBOXSDK_APP_ID` should be generated on InboxSDK's page (the URL is on the `credentials.js` file).
 1. Open Chrome/Brave, open the Extensions tab, toggle Developer Mode on (there should be a toggle switch somewhere in the window, or see [here](https://developer.chrome.com/docs/extensions/mv2/getstarted/#manifest) for screenshots)
-1. Click the Load Unpacked button, browse to the `extension` folder and select it. 
-1. Verify that a new entry has appeared. It should be called "Gmail Sign&Send".
+1. Click the Load Unpacked button, browse to the `extension` folder and select it.
+1. The Options page for the newly installed extension should appear. Configure the extension to your liking:
+  * The Verification webpage URL should be set to the URL where the companion verifier webpage is hosted (it will appear on email footers and on every signature file). See below for more details on the verifier.
+  * Choose a file containing a valid ECDSA P-521 private key, encoded as PEM, for the Private key file field. This private key will be used to generate the signatures, and its corresponding public key should be used to verify them.
 1. Open or reload Gmail.
 1. Click the New Message button or Reply to a message.
-1. Check that a blue "Sign & Send" button appears near the normal Send button. 
+1. Check that a blue "Sign & Send" button appears near the normal Send button.
 
 You're done!
 
@@ -31,6 +33,8 @@ From now on, every time you want to send an email with attachments, click the ne
 The signatures are useless if the email recipients don't verify them. This is the job of the companion webpage, which is contained on the `docs` folder (just because Github Pages wants to serve files located either at the root of the repository or on a `docs` directory. This webpage should prompt the user to upload a file and its signature, verify the signature against the file using a (currently hard-coded) public key, and show the user a big PASS/FAIL message. The public key can be safely hardcoded, because it's... well... public.
 
 My own implementation is hosted on Github Pages, since it comes for free with the repo! The verification webpage is extremely simple: a single HTML file with some JS. Therefore, it should be hostable virtually anywhere.
+
+Before deployment, you should edit `docs/credentials.js` to contain your own public key. The one that is currently included is useless without the private key, which I will NOT commit to the repo :)
 
 ## Cryptography (safely skippable if uninterested/inexperienced)
 
