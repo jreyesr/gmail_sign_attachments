@@ -32,9 +32,9 @@ From now on, every time you want to send an email with attachments, click the ne
 
 The signatures are useless if the email recipients don't verify them. This is the job of the companion webpage, which is contained on the `docs` folder (just because Github Pages wants to serve files located either at the root of the repository or on a `docs` directory. This webpage should prompt the user to upload a file and its signature, verify the signature against the file using a (currently hard-coded) public key, and show the user a big PASS/FAIL message. The public key can be safely hardcoded, because it's... well... public.
 
-My own implementation is hosted on Github Pages, since it comes for free with the repo! The verification webpage is extremely simple: a single HTML file with some JS. Therefore, it should be hostable virtually anywhere.
+My own implementation is hosted on Github Pages, since it comes for free with the repo! The verification webpage is extremely simple: a single HTML file, some JS and some CDN links for Vue and Vuetify. Therefore, it should be hostable virtually anywhere.
 
-Before deployment, you should edit `docs/credentials.js` to contain your own public key. The one that is currently included is useless without the private key, which I will NOT commit to the repo :)
+Before deployment, you should rename `docs/credentials.js.example` to `docs/credentials.js` and edit it to contain your own public key and name. The key on `docs/credentials.js.example` is not a valid key, and the one that was included on previous versions of the code was (and still is) useless without the matching private key, which I will NOT ever commit to the repo :)
 
 ## Cryptography (safely skippable if uninterested/inexperienced)
 
