@@ -1,0 +1,26 @@
+name: Deploy to GH Pages
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Put user-specific data on credentials.js file
+        run: |
+          echo "CREDENTIALS={PUBLIC_VERIFICATION_KEY:'$X', USER_NAME:'$Y'}" > docs/credentials.js
+        env:
+          X: ${{ secrets.PUBLIC_VERIFICATION_KEY }} 
+          Y: ${{ secrets.USER_NAME }} 
+          
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@4.1.1
+        with:
+          branch: gh-pages # The branch the action should deploy to.
+          folder: docs # The folder the action should deploy.
