@@ -14,7 +14,7 @@ jobs:
 
       - name: Put user-specific data on credentials.js file
         run: |
-          echo "CREDENTIALS={PUBLIC_VERIFICATION_KEY:'$X', USER_NAME:'$Y'}" > docs/credentials.js
+          echo "const CREDENTIALS = {PUBLIC_VERIFICATION_KEY:'$X', USER_NAME:'$Y'}" > docs/credentials.js
         env:
           X: ${{ secrets.PUBLIC_VERIFICATION_KEY }} 
           Y: ${{ secrets.USER_NAME }} 
