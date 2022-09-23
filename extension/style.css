@@ -1,5 +1,5 @@
 .sendAndSign:after{
-  content: "Sign & Send"; 
+  content: "Sign"; 
   font-family: 'Google Sans', Roboto,RobotoDraft,Helvetica,Arial,sans-serif;
   font-size: .875rem;
   letter-spacing: .25px;
@@ -8,3 +8,18 @@
   line-height: 18px;
   vertical-align: middle;
 }​
+
+.inboxsdk__compose_sendButton {
+  border-radius: 18px !important;
+  font-size: .875rem !important;
+  background-color: #0b57d0 !important;
+  padding: 6px 8px 6px 14px !important;
+  margin-left: 9px !important;
+  cursor: pointer;
+}
+
+.inboxsdk__compose_sendButton:hover {
+  box-shadow: 0 1px 2px 0 rgb(26 115 232 / 45%), 0 1px 3px 1px rgb(26 115 232 / 30%);
+  background-color: #297be6;
+  outline: 1px solid transparent;
+}

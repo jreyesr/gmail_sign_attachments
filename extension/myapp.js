@@ -15,7 +15,7 @@ InboxSDK.load(2, CREDENTIALS.INBOXSDK_APP_ID).then(function(sdk){
 
     // a compose view has come into existence, do something with it!
     composeView.addButton({
-      title: "Sign & Send",
+      title: "Sign",
       type: "SEND_ACTION",
       iconUrl: "https://material-icons.github.io/material-icons-png/png/white/edit/baseline-4x.png",
       iconClass: "sendAndSign",
@@ -52,7 +52,7 @@ async function computeSignature(filename, url) {
     // fetch the part of the PEM string between header and footer
     const pemHeader = "-----BEGIN PRIVATE KEY-----";
     const pemFooter = "-----END PRIVATE KEY-----";
-    const pemContents = pem.substring(pemHeader.length, pem.length - pemFooter.length - 1).trim();
+    const pemContents = pem.substring(pemHeader.length, pem.length - pemFooter.length).trim();
     // base64 decode the string to get the binary data
     const binaryDerString = window.atob(pemContents);
     // convert from a binary string to an ArrayBuffer
@@ -125,17 +125,23 @@ async function signAndSend(composeView) {
   blobs.forEach(b => b[1].name = b[0] + ".signature.txt"); // Set attachment name to original name plus ".signature.txt" suffix
   blobs = blobs.map(b => b[1]); // The filename is no longer required, just take it out
 
-  // 2. Attach signatures as files to message
-  composeView.attachFiles(blobs);
 
-  // 3. Add footer on message explaining attachments & link to verification page
-  if(signatures.length > 0) {
-    let footer = document.createElement("div");
-    footer.innerHTML = `<hr>This email's attachments are digitally signed to guarantee that they come from A B.
-    To verify the signatures, visit <a href="${verificationPage}">${verificationPage}</a>`;
-    composeView.setBodyHTML(composeView.getHTMLContent() + footer.outerHTML);
-  }
+  composeView.getBodyElement().focus();
+  setTimeout(function() {
+    // 2. Attach signatures as files to message
+    // composeView.attachFiles(blobs);
+    // HACK: https://stackoverflow.com/a/58466057
+    composeView.attachFiles(blobs);
 
-  // 4. Send message (finally!)
-  composeView.send();
+    // 3. Add footer on message explaining attachments & link to verification page
+    if(signatures.length > 0) {
+      let footer = document.createElement("div");
+      footer.innerHTML = `<hr>This email's attachments are digitally signed to guarantee that they come from A B.
+      To verify the signatures, visit <a href="${verificationPage}">${verificationPage}</a>`;
+      composeView.setBodyHTML(composeView.getHTMLContent() + footer.outerHTML);
+    }
+
+    // 4. Send message (finally!)
+    //composeView.send();
+  }, 1000);
 }
